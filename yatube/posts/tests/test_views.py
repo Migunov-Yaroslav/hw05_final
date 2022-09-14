@@ -3,7 +3,7 @@ import tempfile
 
 from django import forms
 from django.conf import settings
-from django.core.cache import cache, caches
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -300,18 +300,25 @@ class ViewsTest(TestCase):
         Проверить возможность подписаться на автора только 1 раз и
         отписаться от него.
         """
+        following_count_before = self.user.follower.count()
         self.authorized_client.get(reverse(
             'posts:profile_follow',
-            kwargs={'username': self.user_2.username, }
+            kwargs={'username': self.user_2.username}
         ))
+        self.authorized_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': self.user_2.username}
+        ))
+        following_count_after = self.user.follower.count()
         self.assertTrue(Follow.objects.filter(
             user=self.user,
             author=self.user_2,
         ))
+        self.assertEqual(following_count_after, following_count_before + 1)
 
         self.authorized_client.get(reverse(
             'posts:profile_unfollow',
-            kwargs={'username': self.user_2.username, }
+            kwargs={'username': self.user_2.username}
         ))
         self.assertFalse(Follow.objects.filter(
             user=self.user,

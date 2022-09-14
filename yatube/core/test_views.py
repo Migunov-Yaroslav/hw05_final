@@ -1,5 +1,3 @@
-from http import HTTPStatus
-
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 
@@ -30,4 +28,3 @@ class CoreURLTests(TestCase):
         """
         response = self.authorized_client.get('/unexisting_page/')
         self.assertTemplateUsed(response, 'core/404.html')
-
