@@ -79,8 +79,8 @@ class FormsTest(TestCase):
         create_posts. Должно увеличиваться количество постов в БД, атрибуты
         нового поста должны совпадать с атрибутами, переданными в POST запросе.
         """
-        posts_count_in_db = Post.objects.count()
-        posts_in_db_before = [*Post.objects.all()]
+        posts_in_db_before = Post.objects.all()
+        posts_count_in_db = len(posts_in_db_before)
         form_data = {
             'text': 'Новый пост от старого автора',
             'group': self.group.id,
@@ -91,12 +91,12 @@ class FormsTest(TestCase):
             data=form_data,
             follow=True,
         )
-        posts_in_db_after = [*Post.objects.all()]
-        target_post = tuple(set(posts_in_db_after) - set(posts_in_db_before))
+        posts_in_db_after = Post.objects.all()
+        target_post = set(posts_in_db_after) - set(posts_in_db_before)
 
         self.assertEqual(len(target_post), 1)
 
-        post = target_post[0]
+        post = target_post.pop()
 
         self.assertEqual(Post.objects.count(), posts_count_in_db + 1)
         self.assertEqual(post.text, form_data['text'])
