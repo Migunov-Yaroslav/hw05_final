@@ -25,6 +25,7 @@ class ViewsTest(TestCase):
         super().setUpClass()
         cls.user = User.objects.create(username='TestAuthor')
         cls.user_2 = User.objects.create(username='TestAuthor2')
+        cls.user_3 = User.objects.create(username='TestAuthor3')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-group',
@@ -59,6 +60,7 @@ class ViewsTest(TestCase):
             post=cls.post,
             author=cls.user,
         )
+        cls.follow = Follow.objects.create(user=cls.user, author=cls.user_3)
 
     @classmethod
     def tearDownClass(cls):
@@ -140,7 +142,9 @@ class ViewsTest(TestCase):
         Проверить view-функцию profile.
         В словаре context должны содержаться объекты Post с соответствующими
         полями. Автор каждого поста должен совпадать с автором,
-        содержащимся в словаре context.
+        содержащимся в словаре context. В словаре context должна содержаться
+        переменная булевского типа following = False, поскольку
+        авторизованный клиент делает запрос к своему профайлу.
         """
         response = self.authorized_client.get(reverse(
             'posts:profile', kwargs={'username': self.user.username},
@@ -158,6 +162,8 @@ class ViewsTest(TestCase):
                     getattr(response.context.get('page_obj')[0], field),
                     getattr(self.post, field),
                 )
+        self.assertIsInstance(response.context.get('following'), bool)
+        self.assertFalse(response.context.get('following'))
 
     def test_view_post_detail(self):
         """
@@ -165,11 +171,13 @@ class ViewsTest(TestCase):
         В словаре context должны содержаться
         - один объект Post с соответствующими полями, созданный
         пользователем с заданным id;
-        - список объектов Comment, относящихся к этому посту.
+        - список объектов Comment, относящихся к этому посту;
+        - форма для создания комментария к посту.
         """
         response = self.authorized_client.get(reverse(
             'posts:post_detail', kwargs={'post_id': self.post.id},
         ))
+        form_fields = {'text': forms.fields.CharField}
         for field in self.fields:
             with self.subTest(field=field):
                 self.assertEqual(
@@ -185,6 +193,10 @@ class ViewsTest(TestCase):
                     element.post,
                     response.context.get('post'),
                 )
+        self.assertIsInstance(
+            response.context.get('form').fields.get('text'),
+            form_fields['text'],
+        )
 
     def test_view_post_create(self):
         """
@@ -296,10 +308,11 @@ class ViewsTest(TestCase):
         self.assertNotEqual(posts_after_create, posts_after_clear_cache)
 
     def test_follow_possibility(self):
-        """
-        Проверить возможность подписаться на автора только 1 раз и
-        отписаться от него.
-        """
+        """Проверить возможность подписаться на автора только 1 раз."""
+        self.assertFalse(Follow.objects.filter(
+            user=self.user,
+            author=self.user_2,
+        ))
         following_count_before = self.user.follower.count()
         self.authorized_client.get(reverse(
             'posts:profile_follow',
@@ -316,16 +329,29 @@ class ViewsTest(TestCase):
         ))
         self.assertEqual(following_count_after, following_count_before + 1)
 
+    def test_unfollow_possibility(self):
+        """Проверить возможность отписаться от автора."""
+        self.assertTrue(Follow.objects.filter(
+            user=self.user,
+            author=self.user_3,
+        ))
+        following_count_before = self.user.follower.count()
+        self.authorized_client.get(reverse(
+            'posts:profile_unfollow',
+            kwargs={'username': self.user_3.username}
+        ))
         self.authorized_client.get(reverse(
             'posts:profile_unfollow',
             kwargs={'username': self.user_2.username}
         ))
         self.assertFalse(Follow.objects.filter(
             user=self.user,
-            author=self.user_2,
+            author=self.user_3,
         ))
+        following_count_after = self.user.follower.count()
+        self.assertEqual(following_count_after, following_count_before - 1)
 
-    def test_follow_correct_work(self):
+    def test_follow_creates_for_right_page(self):
         """
         Проверить появление новой записи автора в лентах подписанных на
         него пользователей.
@@ -346,6 +372,21 @@ class ViewsTest(TestCase):
             response.context.get('page_obj').object_list,
         )
 
+    def test_follow_dont_creates_for_wrong_page(self):
+        """
+        Проверить отсутствие записи автора в лентах не подписанных на
+        него пользователей
+        """
+        self.authorized_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': self.user_2.username, }
+        ))
+        new_post = Post.objects.create(
+            text='Тестовый пост3',
+            group=self.group,
+            author=self.user_2,
+            image=self.uploaded,
+        )
         response = self.authorized_client_2.get(reverse('posts:follow_index'))
         self.assertNotIn(
             new_post,

@@ -131,13 +131,13 @@ class FormsTest(TestCase):
         self.assertEqual(
             self.post.image, 'posts/' + self.another_uploaded.name)
 
-    def test_correct_show_new_post(self):
+    def test_correct_show_new_comment(self):
         """
         Проверить, что после успешной отправки комментарий появляется на
         странице поста.
         """
-        comments_count_in_db = Comment.objects.count()
-        comments_in_db_before = [*Comment.objects.all()]
+        comments_in_db_before = Comment.objects.all()
+        comments_count_in_db = len(comments_in_db_before)
         form_data = {
             'text': 'Новый комментарий',
         }
@@ -146,14 +146,12 @@ class FormsTest(TestCase):
             data=form_data,
             follow=True,
         )
-        comments_in_db_after = [*Comment.objects.all()]
-        target_comment = tuple(
-            set(comments_in_db_after) - set(comments_in_db_before)
-        )
+        comments_in_db_after = Comment.objects.all()
+        target_comment = set(comments_in_db_after) - set(comments_in_db_before)
 
         self.assertEqual(len(target_comment), 1)
 
-        comment = target_comment[0]
+        comment = target_comment.pop()
 
         self.assertEqual(Comment.objects.count(), comments_count_in_db + 1)
         self.assertEqual(comment.text, form_data['text'])

@@ -7,10 +7,8 @@ def paginator_func(request, posts):
     """
     Создать паджинатор.
 
-    Используется для постраничного вывода постов в шаблонах:
-    - index.html;
-    - group_list.html;
-    - profile.html;
+    Используется для постраничного вывода постов в шаблонах, где может быть
+    более 10 постов.
     """
     paginator = Paginator(posts, POSTS_ON_PAGE)
     page_number = request.GET.get('page')
