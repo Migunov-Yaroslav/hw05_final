@@ -15,10 +15,7 @@ class CoreURLTests(TestCase):
         cls.user = User.objects.create(username='TestAuthor')
 
     def setUp(self):
-        """
-        Создать 3 клиента: неавторизованного, авторизованного и
-        авторизованного автора поста.
-        """
+        """Создать авторизованный клиент."""
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 

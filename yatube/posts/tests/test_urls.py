@@ -50,6 +50,9 @@ class PostsURLTest(TestCase):
             '/create/': HTTPStatus.FOUND,
             f'/posts/{self.post.id}/edit/': HTTPStatus.FOUND,
             f'/posts/{self.post.id}/comment/': HTTPStatus.FOUND,
+            f'/profile/{self.user.username}/follow/': HTTPStatus.FOUND,
+            f'/profile/{self.user.username}/unfollow/': HTTPStatus.FOUND,
+            f'/follow/': HTTPStatus.FOUND,
         }
         for address, status in urls_status.items():
             with self.subTest(url=address):
@@ -68,6 +71,7 @@ class PostsURLTest(TestCase):
             f'/posts/{self.post.id}/': 'posts/post_detail.html',
             '/create/': 'posts/create_post.html',
             f'/posts/{self.post.id}/edit/': 'posts/create_post.html',
+            f'/follow/': 'posts/follow.html',
         }
         for address, template in templates_urls.items():
             with self.subTest(url=address):

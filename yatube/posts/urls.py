@@ -12,6 +12,10 @@ app_name = 'posts'
 - posts/<int:post_id>/ - страница просмотра поста;
 - create/ - страница создания поста;
 - posts/<int:post_id>/edit/ - страница редактирования поста;
+- posts/<int:post_id>/comment/ - страница создания комментария;
+- follow/ - страница с постами избранных авторов;
+- profile/<str:username>/follow/ - страница создания подписки;
+- profile/<str:username>/unfollow/ - страница удаления подписки
 """
 urlpatterns = [
     path('', views.index, name='index'),

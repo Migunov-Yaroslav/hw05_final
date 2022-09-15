@@ -114,7 +114,12 @@ class Comment(models.Model):
 
 
 class Follow(models.Model):
-    """Класс подписки на автора."""
+    """
+    Класс подписки на автора.
+
+    Предназначен для хранения информации об id подписавшегося пользователя
+    (user) и id пользователя, на которого подписались (author).
+    """
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

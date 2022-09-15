@@ -65,6 +65,7 @@ class FormsTest(TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        """Удалить временную директорию MEDIA"""
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
@@ -107,8 +108,8 @@ class FormsTest(TestCase):
     def test_edit_post(self):
         """
         Проверить, что при редактировании поста изменяется соответствующий
-        пост в БД (текст, группа, а автор остается неизменным) и не создается
-        новый пост.
+        пост в БД (текст, группа и изображение, а автор остается неизменным)
+        и не создается новый пост.
         """
         posts_count_in_db = Post.objects.count()
         form_data = {

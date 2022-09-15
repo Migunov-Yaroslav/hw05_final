@@ -6,7 +6,9 @@ from . import views
 app_name = 'about'
 
 """
-Список URL приложения about
+Список URL приложения about:
+- author/ - информация об авторе;
+- tech/ - информация об использованных технологиях.
 """
 urlpatterns = [
     path('author/', views.AboutAuthorView.as_view(), name='author'),

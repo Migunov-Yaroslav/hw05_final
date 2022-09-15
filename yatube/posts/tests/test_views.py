@@ -21,7 +21,10 @@ class ViewsTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Создать объекты пользователя, группы, поста для тестовой БД."""
+        """
+        Создать объекты пользователя, группы, поста, комментария и подписки
+        для тестовой БД.
+        """
         super().setUpClass()
         cls.user = User.objects.create(username='TestAuthor')
         cls.user_2 = User.objects.create(username='TestAuthor2')
@@ -64,11 +67,12 @@ class ViewsTest(TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        """Удалить временную директорию MEDIA."""
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
-        """Создает авторизованного пользователя"""
+        """Создать авторизованные клиенты"""
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.authorized_client_2 = Client()
@@ -340,10 +344,6 @@ class ViewsTest(TestCase):
             'posts:profile_unfollow',
             kwargs={'username': self.user_3.username}
         ))
-        self.authorized_client.get(reverse(
-            'posts:profile_unfollow',
-            kwargs={'username': self.user_2.username}
-        ))
         self.assertFalse(Follow.objects.filter(
             user=self.user,
             author=self.user_3,
@@ -375,7 +375,7 @@ class ViewsTest(TestCase):
     def test_follow_dont_creates_for_wrong_page(self):
         """
         Проверить отсутствие записи автора в лентах не подписанных на
-        него пользователей
+        него пользователей.
         """
         self.authorized_client.get(reverse(
             'posts:profile_follow',
