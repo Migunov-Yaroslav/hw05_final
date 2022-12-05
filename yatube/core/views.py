@@ -1,3 +1,4 @@
+from posts.models import Group
 from django.shortcuts import render
 
 

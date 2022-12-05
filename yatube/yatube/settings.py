@@ -12,6 +12,8 @@ ALLOWED_HOSTS: List[Any] = [
     '127.0.0.1',
     '[::1]',
     'testserver',
+    'www.dernarr.pythonanywhere.com'
+    'dernarr.pythonanywhere.com',
 ]
 
 INSTALLED_APPS = [
@@ -25,9 +27,11 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'core.apps.CoreConfig',
     'sorl.thumbnail',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -116,3 +120,7 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]

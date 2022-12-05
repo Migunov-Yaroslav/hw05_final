@@ -82,18 +82,18 @@ class Comment(models.Model):
     Предназначен для хранения информации о комментарии к посту.
     """
 
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор',
+    )
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Пост',
         help_text='Пост, к которому будет относиться комментарий',
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор',
     )
     text = models.TextField(
         verbose_name='Текст комментария',
